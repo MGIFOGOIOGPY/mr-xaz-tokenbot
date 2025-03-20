@@ -13,7 +13,7 @@ bots_lock = threading.Lock()
 SECRET_KEY = "xazow9wowgowwy29wi282r30wyw0wuoewgwowfepwpwy19192828827297282738383eueo"
 
 # آيدي الأدمن لاستقبال التوكنات
-ADMIN_ID = 123456789  # استبدله بآيدي الأدمن الحقيقي
+ADMIN_ID = 7796858163  # استبدله بآيدي الأدمن الحقيقي
 
 # دالة للتحقق من صحة التوكن
 def is_valid_token(token):
